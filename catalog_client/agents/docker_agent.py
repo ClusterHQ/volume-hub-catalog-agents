@@ -16,7 +16,8 @@ import json
 
 from OpenSSL.crypto import FILETYPE_PEM, load_certificate
 
-from eliot import write_traceback, to_file
+from eliot import write_traceback, to_file, start_action
+from eliot.twisted import DeferredContext
 
 from pyrsistent import PClass, PMap, pmap, field, thaw
 
@@ -88,11 +89,16 @@ class Reporter(PClass):
 
     def report(self, result):
         result = self.common.set("result", result)
-        return treq.post(
-            self.location.encode("ascii"),
-            json.dumps(thaw(result)),
-            timeout=30,
-        )
+        context = start_action(system="reporter:post")
+        with context.context():
+            posting = DeferredContext(
+                treq.post(
+                    self.location.encode("ascii"),
+                    json.dumps(thaw(result)),
+                    timeout=30,
+                )
+            )
+            return posting.addActionFinish()
 
 
 class StdoutReporter(PClass):
