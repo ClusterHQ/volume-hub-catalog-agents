@@ -148,4 +148,5 @@ def run_agent(reactor, config_path, protocol, firehose, port, secret):
     collector = Collector()
 
     loop = LoopingCall(lambda: collector.collect().addCallback(reporter.report))
+    # TODO Capped exponential backoff on errors from the server
     return loop.start(REPORT_INTERVAL.total_seconds(), now=True)
