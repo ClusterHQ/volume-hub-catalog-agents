@@ -7,7 +7,7 @@ setup(
         "console_scripts": [
             "catalog-docker-agent = agents.docker_agent:main", # run on agent nodes only
             #"catalog-log-agent = agents.log_agent:main", # run on every node
-            #"catalog-dataset-agent = agents.dataset_agent:main", # run on control service
+            "catalog-dataset-agent = agents.dataset_agent:main", # run on control service
         ],
     },
     version="0.1",

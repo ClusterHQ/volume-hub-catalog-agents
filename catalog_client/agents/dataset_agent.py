@@ -13,10 +13,31 @@ import treq
 from twisted.internet.defer import gatherResults
 from twisted.python.filepath import FilePath
 
-from .agentlib import get_client
+from .agentlib import get_client, agent_main
 
+def main():
+    collector = _collector_from_environment(environ)
+    return agent_main(collector)
+
+
+def _collector_from_environment(environ):
+    config_path = FilePath(environ[b"FLOCKER_CONFIGURATION_PATH"])
+    with config_path.child(b"agent.yml").open() as config:
+        agent_config = yaml.load(config.read())
+        target_hostname = agent_config[u"control-service"][u"hostname"]
+
+    return _Collector(
+        flocker_client=get_client(
+            certificates_path=config_path,
+            user_key_filename="user.key",
+            user_certificate_filename="user.crt",
+        ),
+        base_url="https://{hostname}:4523/v1".format(hostname=target_hostname),
+    )
 
 class _Collector(object):
+    name = b"flocker"
+
     def __init__(self, flocker_client, base_url):
         self._client = flocker_client
         self._base_url = base_url
@@ -40,18 +61,3 @@ class _Collector(object):
             )
         )
         return d
-
-def collector():
-    config_path = FilePath(environ[b"FLOCKER_CONFIGURATION_PATH"])
-    with config_path.child(b"agent.yml").open() as config:
-        agent_config = yaml.load(config.read())
-        target_hostname = agent_config[u"control-service"][u"hostname"]
-
-    return _Collector(
-        flocker_client=get_client(
-            certificates_path=config_path,
-            user_key_filename="user.key",
-            user_certificate_filename="user.crt",
-        ),
-        base_url="https://{hostname}:4523/v1".format(hostname=target_hostname),
-    )
