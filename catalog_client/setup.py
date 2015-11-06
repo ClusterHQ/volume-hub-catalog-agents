@@ -16,7 +16,7 @@ setup(
     author_email="flocker-users@clusterhq.com",
     url="https://github.com/ClusterHQ/volume-catalog",
     install_requires=[
-        #"PyYAML>=3",
+        "PyYAML>=3",
         "Twisted>=14",
         "treq>=14",
         "pyasn1>=0.1",
