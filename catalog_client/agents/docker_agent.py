@@ -55,6 +55,7 @@ def main():
                     unicode(DEFAULT_FIREHOSE_PORT).encode("ascii"),
                 ).decode("ascii")
             ),
+            # Base64 encoded
             environ["CATALOG_FIREHOSE_SECRET"].decode("ascii"),
         ],
     )
@@ -138,6 +139,7 @@ def find_identifiers(config_path):
 
 def run_agent(reactor, config_path, protocol, firehose, port, secret):
     identifiers = find_identifiers(FilePath(config_path))
+    # Base64 encoded so it is valid json
     common = identifiers.set(u"secret", secret)
     location = u"{protocol}://{host}:{port}/v1/firehose/docker".format(
         protocol=protocol, host=firehose, port=port,
