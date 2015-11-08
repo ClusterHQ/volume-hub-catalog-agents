@@ -1,2 +1,2 @@
-FROM clusterhq/firehose-core
-CMD ["firehose-docker-agent"]
+FROM clusterhq/catalog-agents-core
+CMD ["catalog-docker-agent"]

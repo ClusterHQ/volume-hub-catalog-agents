@@ -1,2 +1,2 @@
-FROM clusterhq/firehose-core
-CMD ["firehose-log-agent"]
+FROM clusterhq/catalog-agents-core
+CMD ["catalog-log-agent"]
