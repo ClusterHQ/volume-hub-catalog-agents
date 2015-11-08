@@ -1,6 +1,6 @@
 # Report dataset state and configuration
 # Report nodes
-# Report node versions
+# Report control service version
 
 # Note: Only run one instance of this collector.  It grabs cluster-wide
 # information and reports it.
