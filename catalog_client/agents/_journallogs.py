@@ -24,7 +24,7 @@ class _JournaldCollector(object):
     def detect(self):
         def check(unit):
             return getProcessValue(
-                _DOCKER, [_DOCKER] + _HOST_COMMAND + [b"systemctl", b"status"] + unit,
+                _DOCKER, [_DOCKER] + _HOST_COMMAND + [b"systemctl", b"status"] + [unit],
                 env=environ,
             )
 

@@ -16,6 +16,18 @@ RUN         apt-get -qy update && \
 
 RUN         virtualenv /app/
 
+# It is really very slow to re-install the Python dependencies every time.
+# TODO: Fix this Dockerfile so we don't have to duplicate the dependencies here
+# but so that we also can cache them in an intermediate image.
+RUN         /app/bin/pip install \
+                         'PyYAML>=3' \
+                         'Twisted>=14' \
+                         'treq>=14' \
+                         'pyasn1>=0.1' \
+                         'docker-py>=1.5.0' \
+                         'pyrsistent>=0.11.9' \
+                         'eliot>=0.9.0'
+
 ADD         . /source
 WORKDIR     /source
 
