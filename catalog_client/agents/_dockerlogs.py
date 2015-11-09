@@ -10,7 +10,9 @@ from ._loglib import _MultiStreamRecorder, _MultiStreamCollector
 class _DockerCollector(object):
     _COREOS_PATH = FilePath(b"/host/etc/coreos/update.conf")
 
-    _CONTAINER_NAMES = {"flocker-dataset-agent", "flocker-control"}
+    _CONTAINER_NAMES = {
+        "flocker-dataset-agent", "flocker-container-agent", "flocker-control",
+    }
 
     _log_streams = None
 
@@ -43,6 +45,9 @@ class _DockerCollector(object):
         )
 
 class _DockerLogStream(object):
+    """
+    Collect logs from one Docker container using the Docker API.
+    """
     loop = None
 
     def __init__(self, docker_client, reactor, container_id, record_log):

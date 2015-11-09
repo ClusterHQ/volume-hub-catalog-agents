@@ -1,3 +1,4 @@
+from twisted.internet.defer import succeed
 from twisted.python.filepath import FilePath
 from twisted.internet.task import LoopingCall
 
@@ -8,11 +9,12 @@ class _SyslogCollector(object):
         # The paths we configure Flocker to log to in the upstart configuration
         # file.  See Flocker/admin/package-files/upstart/flocker-*.conf
         FilePath(b"/var/log/flocker/flocker-dataset-agent.log"),
+        FilePath(b"/var/log/flocker/flocker-container-agent.log"),
         FilePath(b"/var/log/flocker/flocker-control.log"),
     }
 
     def detect(self):
-        return any(path.exists() for path in self._LOG_PATHS)
+        return succeed(any(path.exists() for path in self._LOG_PATHS))
 
     def collect(self):
         if self._log_streams is None:
@@ -36,6 +38,9 @@ class _SyslogCollector(object):
         )
 
 class _FileLogStream(object):
+    """
+    Collect log lines from one file by periodically reading it.
+    """
     def __init__(self, path, record_log):
         self.path = path
         self.record_log = record_log

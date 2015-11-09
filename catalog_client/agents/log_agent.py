@@ -25,7 +25,13 @@ class NoApplicableDetector(Exception):
     """
 
 class _Collector(object):
+    name = b"log"
+
     _COLLECTORS = [
+        # Make sure we look at the Docker collector before the journald
+        # collector.  The Docker collector is applicable to CoreOS for the
+        # moment - which also uses journald but Flocker on CoreOS doesn't log
+        # to journald so we won't find the logs there.
         _DockerCollector(),
         _SyslogCollector(),
         _JournaldCollector(),
@@ -35,7 +41,7 @@ class _Collector(object):
 
     def _filter_detection(self, detection_results):
         applicable = []
-        for collector, (success, detection_result) in zip(self._COLLECTOR, detection_results):
+        for collector, (success, detection_result) in zip(self._COLLECTORS, detection_results):
             if success and detection_result:
                 applicable.append(collector)
         return applicable
@@ -64,7 +70,7 @@ class _Collector(object):
             list(
                 collector.detect()
                 for collector
-                in self._COLLECTOR
+                in self._COLLECTORS
             )
         )
         detecting.addCallback(self._filter_detection)
