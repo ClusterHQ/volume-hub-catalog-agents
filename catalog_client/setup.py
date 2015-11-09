@@ -5,10 +5,9 @@ setup(
     packages=find_packages(),
     entry_points={
         "console_scripts": [
-            "catalog-dataset-agent = agents.dataset_agent:main", # run on control service
+            "catalog-flocker-agent = agents.flocker_agent:main", # run on control service
             "catalog-docker-agent = agents.docker_agent:main", # run on agent nodes
             "catalog-log-agent = agents.log_agent:main", # run on all nodes
-            "catalog-node-agent = agents.node_agent:main", # run on agent nodes
         ],
     },
     version="0.1",
