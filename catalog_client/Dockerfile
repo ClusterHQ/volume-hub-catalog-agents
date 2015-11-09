@@ -12,14 +12,14 @@ RUN         apt-get -qy update && \
             apt-get -qy install libyaml-dev && \
             apt-get -qy install libffi-dev && \
             apt-get -qy install libssl-dev && \
-# Pre-install some requirements to make the next step hopefully faster
-            pip install twisted==14.0.0 treq==0.2.1 service_identity pycrypto pyrsistent pyyaml==3.10
+            apt-get -qy install python-virtualenv
 
-RUN         pip install docker-py
+RUN         virtualenv /app/
 
-ADD         . /app
-
-WORKDIR     /app
+ADD         . /source
+WORKDIR     /source
 
 # Install requirements from the project's setup.py
-RUN         pip install .
+RUN         /app/bin/pip install .
+
+WORKDIR     /app
