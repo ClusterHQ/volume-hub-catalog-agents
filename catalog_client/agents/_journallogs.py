@@ -69,7 +69,7 @@ class _JournaldCollector(object):
                     self.cursors[unit] = cursor
             return combined_results
 
-        reading_journals.addCallback(check_results, self.units)
+        reading_journals.addCallback(check_results, self._units)
         return reading_journals
 
     def _read_journal(self, unit, cursor):
