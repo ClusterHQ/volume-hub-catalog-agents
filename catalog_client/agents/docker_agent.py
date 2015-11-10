@@ -22,7 +22,10 @@ class Collector(object):
     name = b"docker"
 
     def __init__(self):
-        self._client = docker.client.Client(version="1.19")
+        self._client = docker.client.Client(
+            base_uri="unix://host/var/run/docker.sock",
+            version="1.19"
+        )
 
     def _get_container_details(self, container_ids):
         for identity in container_ids:
