@@ -30,7 +30,9 @@ class Collector(object):
     def _get_container_details(self, container_ids):
         for identity in container_ids:
             try:
-                yield self._client.inspect_container(identity)
+                details = deepcopy(self._client.inspect_container(identity))
+                details[u"Config"]["Env"] = u"<elided>"
+                yield details
             except:
                 write_traceback()
 
