@@ -33,6 +33,7 @@ class _SyslogCollector(object):
             )
             for path
             in self._LOG_PATHS
+            if path.exists()
         )
         return (
             _MultiStreamCollector.from_log_streams(log_streams),
