@@ -26,6 +26,8 @@ class _JournaldCollector(object):
         b"flocker-dataset-agent",
         b"flocker-control",
     ]
+    def __init__(self):
+        self.cursors = {}
 
     def detect(self):
         checking = _check(b"flocker-dataset-agent")
@@ -54,7 +56,7 @@ class _JournaldCollector(object):
 
     def collect(self):
         reading_journals = DeferredList(list(
-            self._read_journal(unit)
+            self._read_journal(unit, self.cursors.get(unit))
             for unit in self.units
         ))
 
@@ -70,7 +72,7 @@ class _JournaldCollector(object):
         reading_journals.addCallback(check_results, self.units)
         return reading_journals
 
-    def _read_journal(self, unit):
+    def _read_journal(self, unit, cursor):
         def read_journal(unit, cursor):
             command = _HOST_COMMAND + [
                 b"/usr/bin/journalctl", b"--output", b"cat", b"--unit", unit,
@@ -83,7 +85,7 @@ class _JournaldCollector(object):
 
             return getProcessOutput(command[0], command[1:], env=environ)
 
-        reading = read_journal()
+        reading = read_journal(unit, cursor)
 
         def split_cursor(journal):
             # -- cursor: s=91bc(...)0984
