@@ -81,7 +81,9 @@ class _DockerLogStream(object):
             # stderr (bool): Get STDERR
             #
             # container (str): The container to get logs from
-            stream=True, timestamps=False, tail=0,
+            #
+            # tail=1 because https://github.com/docker/docker-py/issues/845
+            stream=True, timestamps=False, tail=1,
             container=self.container_id,
         )
 
@@ -130,6 +132,7 @@ class _DockerLogStream(object):
                 # little longer than normal.
                 return deferLater(self.reactor, 60, lambda: None)
             log_event, self.log_stream = iterate_result
-            self.record_log(log_event)
+            if log_event:
+                self.record_log(log_event)
         d.addCallback(record_it)
         return d

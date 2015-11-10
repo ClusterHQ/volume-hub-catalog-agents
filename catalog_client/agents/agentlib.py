@@ -127,6 +127,10 @@ def find_identifiers(config_path):
         )
     )
 
+def _maybe_report(result, reporter):
+    if result:
+        return reporter.report(result)
+    return None
 
 def run_agent(reactor, config_path, protocol, firehose, port, secret, collector):
     identifiers = find_identifiers(FilePath(config_path))
@@ -138,7 +142,7 @@ def run_agent(reactor, config_path, protocol, firehose, port, secret, collector)
     reporter = Reporter(location=location, common=common)
     # reporter = StdoutReporter(common=common)
 
-    loop = LoopingCall(lambda: collector.collect().addCallback(reporter.report))
+    loop = LoopingCall(lambda: collector.collect().addCallback(_maybe_report, reporter))
     # TODO Capped exponential backoff on errors from the server
     return loop.start(REPORT_INTERVAL.total_seconds(), now=True)
 
