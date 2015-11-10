@@ -8,7 +8,7 @@
 
 from twisted.internet.defer import DeferredList
 
-from eliot import Message
+from eliot import Message, write_traceback
 
 from .agentlib import agent_main
 from ._dockerlogs import _DockerCollector
@@ -42,8 +42,14 @@ class _Collector(object):
     def _filter_detection(self, detection_results):
         applicable = []
         for collector, (success, detection_result) in zip(self._COLLECTORS, detection_results):
-            if success and detection_result:
-                applicable.append(collector)
+            if success:
+                if detection_result:
+                    applicable.append(collector)
+            else:
+                write_traceback(
+                    system="log-agent:os-detection",
+                    collector=collector.__class__.__name__,
+                )
         return applicable
 
     def _pick_collector(self, applicable):

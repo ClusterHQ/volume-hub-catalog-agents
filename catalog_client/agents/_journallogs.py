@@ -20,14 +20,21 @@ class _JournaldCollector(object):
 
     def detect(self):
         def check(unit):
-            return getProcessValue(
-                _HOST_COMMAND[0], _HOST_COMMAND + [b"systemctl", b"status"] + [unit],
-                env=environ,
-            )
+            command = _HOST_COMMAND + [b"systemctl", b"status"] + [unit]
+            Message.new(
+                system="log-agent:os-detection:journald",
+                unit=unit,
+                command=command,
+            ).write()
+            return getProcessValue(command[0], command, env=environ)
 
         checking_dataset = check(b"flocker-dataset-agent")
 
         def checked_dataset(result):
+            Message.new(
+                system="log-agent:os-detection:journald",
+                result=result,
+            ).write()
             if result == 0:
                 return True
             return check(b"flocker-control")
