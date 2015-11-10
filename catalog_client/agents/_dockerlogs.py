@@ -125,18 +125,23 @@ class _DockerLogStream(object):
                         container=self.container_id,
                     ).write()
 
+            def get_time(logchunk):
+                try:
+                    # Hope we find an Eliot message
+                    message = json.loads(logchunk)
+                    return message["timestamp"]
+                except:
+                    # Probably was some other kind of message, hope the next one is better.
+                    return None
+
             chunks = []
             start_time = None
+            recent_time = None
             for logchunk in log_stream:
                 chunks.append(logchunk)
                 if start_time is None:
-                    try:
-                        # Hope we find an Eliot message
-                        message = json.loads(logchunk)
-                        start_time = message["timestamp"]
-                    except:
-                        # Probably was some other kind of message, hope the next one is better.
-                        pass
+                    start_time = get_time(logchunk)
+                now = time()
 
                 if start_time is None:
                     if len(chunks) > 25:
@@ -148,12 +153,25 @@ class _DockerLogStream(object):
                         # to avoid an unbounded loop.
                         break
                 else:
-                    time_passed = time() - start_time
+                    time_passed = now - start_time
                     if time_passed > 15:
                         # Don't collect more than some time-bounded quantity of
                         # logs at a time.  Nothing is reported to Firehose
                         # until we get out of this loop and return a result.
                         break
+
+                if recent_time is not None:
+                    time_passed = now - recent_time
+                    # If a long time passed getting this new message then we're
+                    # probably caught up and we were blocking waiting for the
+                    # container to write a new log message.  If we're caught
+                    # up, we may as well send what we have now.
+                    if time_passed > 1:
+                        break
+
+                # Remember the time of this message for next time.
+                if get_time(logchunk) is not None:
+                    recent_time = recent_time
 
             # XXX Think about the case where we've reached EOF on some
             # container's logs.  This happens if the container stops.  Current
