@@ -63,7 +63,7 @@ class _JournaldCollector(object):
         def check_results(read_results, units):
             combined_results = {}
             for (unit, (success, result)) in zip(units, read_results):
-                if success:
+                if success and result is not None:
                     journal, cursor = result
                     combined_results[unit] = journal
                     self.cursors[unit] = cursor
@@ -90,6 +90,11 @@ class _JournaldCollector(object):
         def split_cursor(journal):
             # -- cursor: s=91bc(...)0984
             lines = journal.splitlines()
+
+            if not lines:
+                # Unit does not exist
+                return None
+
             cursor_line = lines.pop()
             if cursor_line.startswith("-- cursor: "):
                 cursor = cursor_line[len("-- cursor: "):].strip()
