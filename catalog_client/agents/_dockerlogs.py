@@ -136,7 +136,7 @@ class _DockerLogStream(object):
 
             chunks = []
             start_time = None
-            recent_time = None
+            recent_time = time()
             for logchunk in log_stream:
                 chunks.append(logchunk)
                 if start_time is None:
@@ -160,18 +160,16 @@ class _DockerLogStream(object):
                         # until we get out of this loop and return a result.
                         break
 
-                if recent_time is not None:
-                    time_passed = now - recent_time
-                    # If a long time passed getting this new message then we're
-                    # probably caught up and we were blocking waiting for the
-                    # container to write a new log message.  If we're caught
-                    # up, we may as well send what we have now.
-                    if time_passed > 1:
-                        break
+                time_passed = now - recent_time
+                # If a long time passed getting this new message then we're
+                # probably caught up and we were blocking waiting for the
+                # container to write a new log message.  If we're caught
+                # up, we may as well send what we have now.
+                if time_passed > 1:
+                    break
 
-                # Remember the time of this message for next time.
-                if get_time(logchunk) is not None:
-                    recent_time = recent_time
+                # Remember when we got this message for comparison to the next time
+                recent_time = now
 
             # XXX Think about the case where we've reached EOF on some
             # container's logs.  This happens if the container stops.  Current
