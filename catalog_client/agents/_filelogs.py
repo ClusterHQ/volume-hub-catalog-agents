@@ -1,3 +1,5 @@
+from os import SEEK_END
+
 from twisted.internet.defer import succeed
 from twisted.python.filepath import FilePath
 from twisted.internet.task import LoopingCall
