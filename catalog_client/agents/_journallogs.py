@@ -57,7 +57,7 @@ class _JournaldCollector(object):
     def collect(self):
         reading_journals = DeferredList(list(
             self._read_journal(unit, self.cursors.get(unit))
-            for unit in self.units
+            for unit in self._units
         ))
 
         def check_results(read_results, units):
