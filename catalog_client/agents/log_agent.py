@@ -28,13 +28,13 @@ class _Collector(object):
     name = b"log"
 
     _COLLECTORS = [
-        # Make sure we look at the Docker collector before the journald
-        # collector.  The Docker collector is applicable to CoreOS for the
-        # moment - which also uses journald but Flocker on CoreOS doesn't log
-        # to journald so we won't find the logs there.
-        _DockerCollector(),
+        # Order matters.
         _SyslogCollector(),
         _JournaldCollector(),
+
+        # XXX This one is broken.  It hangs after a while.  Make uft CoreOS
+        # configure Docker to send container logs to journald.
+        _DockerCollector(),
     ]
 
     _collector = None
