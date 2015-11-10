@@ -101,8 +101,4 @@ class _JournaldCollector(object):
                 cursor = None
             return (lines, cursor)
         saving = reading.addCallback(split_cursor)
-
-        def format_results(lines):
-            return dict(lines=lines)
-        saving.addCallback(format_results)
         return saving
