@@ -6,7 +6,7 @@ from twisted.internet.defer import DeferredList
 from eliot import Message
 
 _HOST_COMMAND = [
-    b"chroot", b"/host",
+    b"/usr/sbin/chroot", b"/host",
 ]
 
 class _JournaldCollector(object):
@@ -20,7 +20,7 @@ class _JournaldCollector(object):
 
     def detect(self):
         def check(unit):
-            command = _HOST_COMMAND + [b"systemctl", b"status"] + [unit]
+            command = _HOST_COMMAND + [b"/usr/bin/systemctl", b"status"] + [unit]
             Message.new(
                 system="log-agent:os-detection:journald",
                 unit=unit,
@@ -41,6 +41,10 @@ class _JournaldCollector(object):
         checking_control = checking_dataset.addCallback(checked_dataset)
 
         def checked_control(result):
+            Message.new(
+                system="log-agent:os-detection:journald",
+                result=result,
+            ).write()
             if result == 0:
                 return True
             return False
@@ -69,7 +73,7 @@ class _JournaldCollector(object):
     def _read_journal(self, unit):
         def read_journal(unit, cursor):
             command = _HOST_COMMAND + [
-                b"journalctl", b"--output", b"cat", b"--unit", unit,
+                b"/usr/bin/journalctl", b"--output", b"cat", b"--unit", unit,
                 b"--show-cursor",
             ]
             if cursor is None:
