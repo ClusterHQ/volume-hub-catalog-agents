@@ -4,6 +4,10 @@ from twisted.internet.task import LoopingCall
 
 from ._loglib import _MultiStreamRecorder, _MultiStreamCollector
 
+def _path_to_unit(path):
+    # /host/var/log/flocker/flocker-dataset-agent.log -> flocker-dataset-agent
+    return path.basename().split(b".")[0]
+
 class _SyslogCollector(object):
     _LOG_PATHS = {
         # The paths we configure Flocker to log to in the upstart configuration
@@ -29,7 +33,7 @@ class _SyslogCollector(object):
         log_streams = list(
             _FileLogStream(
                 path=path,
-                record_log=recorder.recorder(path.basename())
+                record_log=recorder.recorder(_path_to_unit(path))
             )
             for path
             in self._LOG_PATHS
