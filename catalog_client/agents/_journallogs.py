@@ -5,10 +5,7 @@ from twisted.internet.defer import DeferredList
 
 from eliot import Message
 
-_DOCKER = b"/usr/bin/docker"
 _HOST_COMMAND = [
-    b"run", b"-it", b"--rm",
-    b"-v", b"/:/host", b"centos:7",
     b"chroot", b"/host",
 ]
 
@@ -24,7 +21,7 @@ class _JournaldCollector(object):
     def detect(self):
         def check(unit):
             return getProcessValue(
-                _DOCKER, [_DOCKER] + _HOST_COMMAND + [b"systemctl", b"status"] + [unit],
+                _HOST_COMMAND[0], _HOST_COMMAND + [b"systemctl", b"status"] + [unit],
                 env=environ,
             )
 
@@ -73,7 +70,7 @@ class _JournaldCollector(object):
             else:
                 command.extend([b"--after-cursor", cursor])
 
-            return getProcessOutput(_DOCKER, command, env=environ)
+            return getProcessOutput(command[0], command[1:], env=environ)
 
         reading = read_journal()
 
