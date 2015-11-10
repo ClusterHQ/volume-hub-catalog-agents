@@ -7,6 +7,8 @@
 
 from __future__ import print_function
 
+from copy import deepcopy
+
 import docker
 from twisted.internet.defer import succeed
 
