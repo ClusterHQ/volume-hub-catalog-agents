@@ -64,7 +64,7 @@ class _DockerLogStream(object):
         self.record_log = record_log
 
     def _open_log_stream(self):
-        return self.docker_client.logs(
+        log_stream = iter(self.docker_client.logs(
             # http://docker-py.readthedocs.org/en/1.5.0/api/#logs
             #
             # The stream parameter makes the logs function return a blocking
@@ -85,7 +85,11 @@ class _DockerLogStream(object):
             # tail=1 because https://github.com/docker/docker-py/issues/845
             stream=True, timestamps=False, tail=1,
             container=self.container_id,
-        )
+        ))
+        # Throw away one line because of the tail=1 hack.
+        next(log_stream)
+        return log_stream
+
 
     def run(self):
         self.loop = LoopingCall(self._next)
@@ -118,7 +122,13 @@ class _DockerLogStream(object):
                         container=self.container_id,
                     ).write()
 
-            logchunk = next(log_stream)
+
+            try:
+                logchunk = next(log_stream)
+            except StopIteration:
+                # XXX We reached the end of the log of a stopped container.
+                # Think about something better to do in this case.
+                logchunk = None
             return (logchunk, log_stream)
 
 
