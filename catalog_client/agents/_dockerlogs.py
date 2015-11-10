@@ -2,6 +2,7 @@ from twisted.python.filepath import FilePath
 from twisted.internet.defer import succeed
 from twisted.internet.task import LoopingCall
 from twisted.internet.threads import deferToThreadPool
+from twisted.internet import reactor
 
 from docker import Client
 
@@ -15,6 +16,8 @@ class _DockerCollector(object):
     }
 
     _log_streams = None
+
+    reactor = reactor
 
     def detect(self):
         # Flocker only runs in Docker on CoreOS so far.
