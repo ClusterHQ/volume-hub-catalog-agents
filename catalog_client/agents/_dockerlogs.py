@@ -1,6 +1,6 @@
 from twisted.python.filepath import FilePath
 from twisted.internet.defer import succeed
-from twisted.internet.task import LoopingCall
+from twisted.internet.task import LoopingCall, deferLater
 from twisted.internet.threads import deferToThreadPool
 from twisted.internet import reactor
 
@@ -87,7 +87,7 @@ class _DockerLogStream(object):
 
     def run(self):
         self.loop = LoopingCall(self._next)
-        return self.loop.start(0.0, now=True)
+        return self.loop.start(5.0, now=True)
 
     def _next(self):
         def maybe_open_then_iterate(log_stream):
@@ -126,8 +126,9 @@ class _DockerLogStream(object):
         )
         def record_it(iterate_result):
             if iterate_result is None:
-                # Couldn't open the log stream.
-                return
+                # Couldn't open the log stream.  Delay future attempts by a
+                # little longer than normal.
+                return deferLater(self.reactor, 60, lambda: None)
             log_event, self.log_stream = iterate_result
             self.record_log(log_event)
         d.addCallback(record_it)
