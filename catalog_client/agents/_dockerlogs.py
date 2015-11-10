@@ -1,3 +1,6 @@
+import json
+from time import time
+
 from twisted.python.filepath import FilePath
 from twisted.internet.defer import succeed
 from twisted.internet.task import LoopingCall, deferLater
@@ -122,15 +125,41 @@ class _DockerLogStream(object):
                         container=self.container_id,
                     ).write()
 
+            chunks = []
+            start_time = None
+            for logchunk in log_stream:
+                chunks.append(logchunk)
+                if start_time is None:
+                    try:
+                        # Hope we find an Eliot message
+                        message = json.loads(logchunk)
+                        start_time = message["timestamp"]
+                    except:
+                        # Probably was some other kind of message, hope the next one is better.
+                        pass
 
-            try:
-                logchunk = next(log_stream)
-            except StopIteration:
-                # XXX We reached the end of the log of a stopped container.
-                # Think about something better to do in this case.
-                logchunk = None
-            return (logchunk, log_stream)
+                if start_time is None:
+                    if len(chunks) > 25:
+                        # Don't collect more than some chunk-count-bounded
+                        # quantity of logs if we're failing to determine a
+                        # starting timestamp.  Something may be going wrong at
+                        # a layer of the system that doesn't generate
+                        # recognizable timestamps.  If that's happening we want
+                        # to avoid an unbounded loop.
+                        break
+                else:
+                    time_passed = time() - start_time
+                    if time_passed > 15:
+                        # Don't collect more than some time-bounded quantity of
+                        # logs at a time.  Nothing is reported to Firehose
+                        # until we get out of this loop and return a result.
+                        break
 
+            # XXX Think about the case where we've reached EOF on some
+            # container's logs.  This happens if the container stops.  Current
+            # behavior is probably to never notice logs when the container
+            # restarts which is probably bad.
+            return (chunks, log_stream)
 
         d = deferToThreadPool(
             self.reactor, self.reactor.getThreadPool(),
