@@ -24,7 +24,7 @@ class _MultiStreamCollector(object):
 
 class _MultiStreamRecorder(object):
     def __init__(self):
-        self._logs = []
+        self._logs = {}
 
     def recorder(self, key):
         return partial(self._record_log, key)
