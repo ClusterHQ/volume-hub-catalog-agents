@@ -52,6 +52,7 @@ class _FileLogStream(object):
         self.path = path
         self.record_log = record_log
         self.log_file = self.path.open()
+        self.log_file.seek(0, SEEK_END)
 
     def run(self):
         self.loop = LoopingCall(self._next, self.log_file)
