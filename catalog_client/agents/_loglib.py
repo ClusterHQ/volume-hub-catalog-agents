@@ -35,4 +35,6 @@ class _MultiStreamRecorder(object):
         return result
 
     def _record_log(self, key, log_event):
-        self._logs.setdefault(key, []).append(log_event)
+        if not isinstance(log_event, list):
+            raise Exception("Log event isn't a list: {}".format(log_event))
+        self._logs.setdefault(key, []).extend(log_event)
