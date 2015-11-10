@@ -1,7 +1,6 @@
 from functools import partial
 
 from twisted.internet.task import LoopingCall
-from twisted.internet.defer import succeed
 
 from eliot import write_failure
 
@@ -33,7 +32,7 @@ class _MultiStreamRecorder(object):
     def consume(self):
         result = self._logs
         self._logs = {}
-        return succeed(result)
+        return result
 
     def _record_log(self, key, log_event):
         self._logs.setdefault(key, []).append(log_event)
