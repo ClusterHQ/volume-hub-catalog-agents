@@ -13,6 +13,8 @@ class _SyslogCollector(object):
         FilePath(b"/host/var/log/flocker/flocker-control.log"),
     }
 
+    _log_streams = None
+
     def detect(self):
         return succeed(any(path.exists() for path in self._LOG_PATHS))
 
