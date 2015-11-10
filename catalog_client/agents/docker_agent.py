@@ -23,7 +23,7 @@ class Collector(object):
 
     def __init__(self):
         self._client = docker.client.Client(
-            base_url="unix://host/var/run/docker.sock",
+            base_url="unix://host/run/docker.sock",
             version="1.19"
         )
 
