@@ -1,7 +1,7 @@
 from os import environ, system
 
 from twisted.internet.utils import getProcessValue, getProcessOutput
-from twisted.internet.defer import DeferredList
+from twisted.internet.defer import DeferredList, succeed
 
 from eliot import Message
 
@@ -27,7 +27,7 @@ class _JournaldCollector(object):
                 command=command,
             ).write()
             # return getProcessValue(command[0], command, env=environ)
-            return system(" ".join(command))
+            return succeed(system(" ".join(command)))
 
         checking_dataset = check(b"flocker-dataset-agent")
 
