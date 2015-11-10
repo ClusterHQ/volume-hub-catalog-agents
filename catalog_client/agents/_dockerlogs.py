@@ -4,7 +4,10 @@ from twisted.internet.task import LoopingCall
 from twisted.internet.threads import deferToThreadPool
 from twisted.internet import reactor
 
+from eliot import Message, write_traceback
+
 from docker import Client
+from docker.errors import NotFound
 
 from ._loglib import _MultiStreamRecorder, _MultiStreamCollector
 
@@ -52,13 +55,16 @@ class _DockerLogStream(object):
     Collect logs from one Docker container using the Docker API.
     """
     loop = None
+    log_stream = None
 
     def __init__(self, docker_client, reactor, container_id, record_log):
         self.docker_client = docker_client
         self.reactor = reactor
         self.container_id = container_id
         self.record_log = record_log
-        self.log_stream = self.docker_client.logs(
+
+    def _open_log_stream(self):
+        return self.docker_client.logs(
             # http://docker-py.readthedocs.org/en/1.5.0/api/#logs
             #
             # The stream parameter makes the logs function return a blocking
@@ -80,16 +86,46 @@ class _DockerLogStream(object):
         )
 
     def run(self):
-        self.loop = LoopingCall(
-            self._next, self.log_stream
-        )
+        self.loop = LoopingCall(self._next)
         return self.loop.start(0.0, now=True)
 
-    def _next(self, log_stream):
+    def _next(self):
+        def maybe_open_then_iterate(log_stream):
+            if log_stream is None:
+                try:
+                    log_stream = self._open_log_stream()
+                except NotFound:
+                    Message.new(
+                        system="log-agent:docker-collector:open:failed",
+                        container=self.container_id,
+                        reason="not found",
+                    ).write()
+                    return None
+                except:
+                    write_traceback(
+                        system="log-agent:docker-collector:open:failed",
+                        container=self.container_id,
+                    )
+                    return None
+                else:
+                    Message.new(
+                        system="log-agent:docker-collector:open:succeeded",
+                        container=self.container_id,
+                    ).write()
+
+            logchunk = next(log_stream)
+            return (logchunk, log_stream)
+
+
         d = deferToThreadPool(
-            self.reactor, self.reactor.getThreadPool(), next, self.log_stream,
+            self.reactor, self.reactor.getThreadPool(),
+            maybe_open_then_iterate, self.log_stream,
         )
-        def record_it(log_event):
+        def record_it(iterate_result):
+            if iterate_result is None:
+                # Couldn't open the log stream.
+                return
+            log_event, self.log_stream = iterate_result
             self.record_log(log_event)
         d.addCallback(record_it)
         return d
