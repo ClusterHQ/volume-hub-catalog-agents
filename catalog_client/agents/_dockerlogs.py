@@ -92,6 +92,9 @@ class _DockerLogStream(object):
     def _next(self):
         def maybe_open_then_iterate(log_stream):
             if log_stream is None:
+                # Try opening the stream any time we don't already have it
+                # open.  Maybe the container we're watching went away for a
+                # minute and is going to come back.
                 try:
                     log_stream = self._open_log_stream()
                 except NotFound:
