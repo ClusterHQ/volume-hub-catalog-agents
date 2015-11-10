@@ -1,13 +1,22 @@
-from os import environ, system
+from os import environ
 
 from twisted.internet.utils import getProcessValue, getProcessOutput
-from twisted.internet.defer import DeferredList, succeed
+from twisted.internet.defer import DeferredList
 
 from eliot import Message
 
 _HOST_COMMAND = [
     b"/usr/sbin/chroot", b"/host",
 ]
+
+def _check(unit):
+    command = _HOST_COMMAND + [b"/usr/bin/systemctl", b"status"] + [unit]
+    Message.new(
+        system="log-agent:os-detection:journald",
+        unit=unit,
+        command=command,
+    ).write()
+    return getProcessValue(command[0], command[1:], env=environ)
 
 class _JournaldCollector(object):
     mark = None
@@ -19,29 +28,9 @@ class _JournaldCollector(object):
     ]
 
     def detect(self):
-        def check(unit):
-            command = _HOST_COMMAND + [b"/usr/bin/systemctl", b"status"] + [unit]
-            Message.new(
-                system="log-agent:os-detection:journald",
-                unit=unit,
-                command=command,
-            ).write()
-            # return getProcessValue(command[0], command, env=environ)
-            return succeed(system(" ".join(command)))
+        checking = _check(b"flocker-dataset-agent")
 
-        checking_dataset = check(b"flocker-dataset-agent")
-
-        def checked_dataset(result):
-            Message.new(
-                system="log-agent:os-detection:journald",
-                result=result,
-            ).write()
-            if result == 0:
-                return True
-            return check(b"flocker-control")
-        checking_control = checking_dataset.addCallback(checked_dataset)
-
-        def checked_control(result):
+        def succeed_or_fail(result):
             Message.new(
                 system="log-agent:os-detection:journald",
                 result=result,
@@ -50,7 +39,17 @@ class _JournaldCollector(object):
                 return True
             return False
 
-        checking = checking_control.addCallback(checked_control)
+        def succeed_or_check_control(result):
+            Message.new(
+                system="log-agent:os-detection:journald",
+                result=result,
+            ).write()
+            if result == 0:
+                return True
+            return _check(b"flocker-control").addCallback(succeed_or_fail)
+
+        checking.addCallback(succeed_or_check_control)
+
         return checking
 
     def collect(self):
