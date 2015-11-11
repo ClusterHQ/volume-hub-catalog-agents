@@ -7,7 +7,7 @@ setup(
         "console_scripts": [
             "catalog-flocker-agent = agents.flocker_agent:main", # run on control service
             "catalog-docker-agent = agents.docker_agent:main", # run on agent nodes
-            "catalog-node-agent = agents.node_agent:main", # run on agent nodes
+            "catalog-node-agent = agents.node_agent:main", # run on all nodes
             "catalog-log-agent = agents.log_agent:main", # run on all nodes
         ],
     },
