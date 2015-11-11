@@ -10,6 +10,8 @@ def main():
 
 
 class _Collector(object):
+    name = b"node"
+
     def collect(self):
         return getProcessOutput(
             b"chroot", [b"/host", b"flocker-diagnostics", b"--version"]
