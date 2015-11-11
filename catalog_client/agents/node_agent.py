@@ -18,4 +18,6 @@ class _Collector(object):
         return getProcessOutput(
             b"chroot", [b"/host", b"flocker-diagnostics", b"--version"],
             env=environ,
+        ).addCallback(
+            lambda version: version.strip()
         )
