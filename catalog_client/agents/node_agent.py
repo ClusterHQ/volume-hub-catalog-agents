@@ -1,5 +1,7 @@
 # Collect Flocker version
 
+from os import environ
+
 from twisted.internet.utils import getProcessOutput
 
 from .agentlib import agent_main
@@ -14,5 +16,6 @@ class _Collector(object):
 
     def collect(self):
         return getProcessOutput(
-            b"chroot", [b"/host", b"flocker-diagnostics", b"--version"]
+            b"chroot", [b"/host", b"flocker-diagnostics", b"--version"],
+            env=environ,
         )
