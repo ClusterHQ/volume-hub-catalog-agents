@@ -8,10 +8,6 @@ TODO: The UFT installer will automatically install these for you if you specify 
 
 If you already have a Flocker cluster, you can follow these instructions to install the catalog agents manually.
 
-Before installing, register for a volume hub account at [https://volumehub.io](https://volumehub.io).
+Before installing, register for a volume hub account at [https://clusterhq.com/volumehub](https://clusterhq.com/volumehub).
 
-Then click "create a cluster" and then copy your secret token into the following command, which you must run on each of your Flocker cluster nodes, replacing ABC with your token below:
-
-```
-$ curl -ssL https://get.volumehub.io |TOKEN=ABC sh
-```
+This will then guide you through setting up and installing the catalog agents.
