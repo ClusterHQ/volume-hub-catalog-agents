@@ -25,6 +25,8 @@ class Collector(object):
 
     def __init__(self):
         self._client = docker.client.Client(
+            # /var/run is normally a symlink and this breaks when bind-mounting
+            # /host
             base_url="unix://host/run/docker.sock",
             version="1.19"
         )
