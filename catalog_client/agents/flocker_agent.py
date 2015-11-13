@@ -14,17 +14,23 @@ from twisted.internet.defer import gatherResults
 from twisted.python.filepath import FilePath
 
 from .agentlib import get_client, agent_main
+from ._x509 import get_dns_subject_alt_name
 
 def main():
     collector = _collector_from_environment(environ)
     return agent_main(collector)
 
+AGENT_YML = b"agent.yml"
 
 def _collector_from_environment(environ):
     config_path = FilePath(environ[b"FLOCKER_CONFIGURATION_PATH"])
-    with config_path.child(b"agent.yml").open() as config:
-        agent_config = yaml.load(config.read())
-        target_hostname = agent_config[u"control-service"][u"hostname"]
+    if config_path.child(AGENT_YML).exists():
+        with config_path.child(AGENT_YML).open() as config:
+            agent_config = yaml.load(config.read())
+            target_hostname = agent_config[u"control-service"][u"hostname"]
+    else:
+        target_hostname = get_dns_subject_alt_name(
+                config_path.child(b"control-service.crt").path)
 
     return _Collector(
         flocker_client=get_client(
