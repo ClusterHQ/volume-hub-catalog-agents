@@ -35,8 +35,8 @@ def _collector_from_environment(environ):
     return _Collector(
         flocker_client=get_client(
             certificates_path=config_path,
-            user_key_filename="user.key",
-            user_certificate_filename="user.crt",
+            user_key_filename=environ.get(b"FLOCKER_USER_KEY", "plugin.key"),
+            user_certificate_filename=environ.get(b"FLOCKER_USER_CERT", "plugin.crt"),
         ),
         base_url="https://{hostname}:4523/v1".format(hostname=target_hostname),
     )
