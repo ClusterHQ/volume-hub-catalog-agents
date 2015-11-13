@@ -35,3 +35,4 @@ WORKDIR     /source
 RUN         /app/bin/pip install .
 
 WORKDIR     /app
+ENV         PATH "$PATH:/app/bin"
