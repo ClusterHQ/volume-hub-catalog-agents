@@ -9,14 +9,6 @@ if [ "$TARGET" = "control-service" ]; then
         --name volume-hub-agent-dataset \
         clusterhq/catalog-agents-dataset
 elif [ "$TARGET" = "agent-node" ]; then
-    sudo docker rm -f volume-hub-agent-node || false
-    sudo docker pull clusterhq/catalog-agents-node
-    sudo -E docker run -d --restart=always \
-        -e CATALOG_FIREHOSE_SECRET="$TOKEN" \
-        -v /etc/flocker:/etc/flocker \
-        -v /var/run/docker.sock:/var/run/docker.sock \
-        --name volume-hub-agent-node \
-        clusterhq/catalog-agents-node
     sudo docker rm -f volume-hub-agent-docker || false
     sudo docker pull clusterhq/catalog-agents-docker
     sudo -E docker run -d --restart=always \
@@ -35,3 +27,11 @@ sudo -E docker run -d --restart=always \
     -v /var/run/docker.sock:/var/run/docker.sock \
     --name volume-hub-agent-log \
     clusterhq/catalog-agents-log
+sudo docker rm -f volume-hub-agent-node || false
+sudo docker pull clusterhq/catalog-agents-node
+sudo -E docker run -d --restart=always \
+    -e CATALOG_FIREHOSE_SECRET="$TOKEN" \
+    -v /etc/flocker:/etc/flocker \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    --name volume-hub-agent-node \
+    clusterhq/catalog-agents-node
