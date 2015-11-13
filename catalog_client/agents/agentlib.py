@@ -12,6 +12,7 @@ from OpenSSL.crypto import FILETYPE_PEM, load_certificate
 from eliot import to_file, start_action
 from eliot.twisted import DeferredContext
 
+from twisted.internet.defer import succeed
 from twisted.internet.task import LoopingCall, react
 from twisted.python.filepath import FilePath
 from twisted.internet import reactor, ssl
@@ -79,7 +80,7 @@ def get_client(
         )
 
 
-class Reporter(PClass):
+class HTTPReporter(PClass):
     common = field(type=PMap, factory=pmap, mandatory=True)
     location = field(type=unicode, mandatory=True)
 
@@ -95,6 +96,27 @@ class Reporter(PClass):
                 )
             )
             return posting.addActionFinish()
+
+
+class _ChangeReporter(object):
+    def __init__(self, reporter):
+        self._wrapped_reporter = reporter
+        self._last_result = None
+
+    def report(self, result):
+        if result != self._last_result:
+            return self._report_and_update(result)
+        return succeed(None)
+
+    def _report_and_update(self, result):
+        reporting = self._wrapped_reporter.report(result)
+
+        def update(passthrough):
+            self._last_result = result
+            return passthrough
+
+        reporting.addCallback(update)
+        return reporting
 
 
 class StdoutReporter(PClass):
@@ -147,8 +169,9 @@ def run_agent(
     location = u"{protocol}://{host}:{port}/v1/firehose/{collector}".format(
         protocol=protocol, host=firehose, port=port, collector=collector.name,
     )
-    reporter = Reporter(location=location, common=common)
+    reporter = HTTPReporter(location=location, common=common)
     # reporter = StdoutReporter(common=common)
+    reporter = _ChangeReporter(reporter)
 
     loop = LoopingCall(
         lambda: collector.collect().addCallback(_maybe_report, reporter)
