@@ -3,9 +3,8 @@
 # Goals: support Ubuntu, CentOS, and CoreOS
 # (https://clusterhq.com/2015/09/01/flocker-runs-on-coreos/)
 #
-# Requires /var/run/docker.sock bind-mounted from the host so the Docker API
-# can be used to run more containers to collect the logs - which reside on the
-# host.
+# Requires / from the host bind-mounted at /host to dig around the various
+# places logs can be found on those platforms.
 
 from twisted.internet.defer import DeferredList
 
