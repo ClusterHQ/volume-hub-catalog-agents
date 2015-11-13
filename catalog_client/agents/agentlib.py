@@ -29,10 +29,11 @@ DEFAULT_FIREHOSE_PROTOCOL = "https"
 REPORT_INTERVAL = timedelta(seconds=5.0)
 
 
-
-def get_client(reactor=reactor, certificates_path=FilePath("/etc/flocker"),
-        user_certificate_filename="plugin.crt", user_key_filename="plugin.key",
-        cluster_certificate_filename="cluster.crt", target_hostname=None):
+def get_client(
+    reactor=reactor, certificates_path=FilePath("/etc/flocker"),
+    user_certificate_filename="plugin.crt", user_key_filename="plugin.key",
+    cluster_certificate_filename="cluster.crt", target_hostname=None
+):
     """
     Create a ``treq``-API object that implements the REST API TLS
     authentication.
@@ -69,10 +70,13 @@ def get_client(reactor=reactor, certificates_path=FilePath("/etc/flocker"),
 
         return HTTPClient(Agent(reactor, contextFactory=ContextFactory()))
     else:
-        raise Exception("Not enough information to construct TLS context: "
-                "user_crt: %s, cluster_crt: %s, user_key: %s, target_hostname: %s" % (
-                    user_crt, cluster_crt, user_key, target_hostname))
-
+        raise Exception(
+            "Not enough information to construct TLS context: "
+            "user_crt: %s, cluster_crt: %s, user_key: %s, "
+            "target_hostname: %s" % (
+                user_crt, cluster_crt, user_key, target_hostname
+            )
+        )
 
 
 class Reporter(PClass):
@@ -127,12 +131,16 @@ def find_identifiers(config_path):
         )
     )
 
+
 def _maybe_report(result, reporter):
     if result:
         return reporter.report(result)
     return None
 
-def run_agent(reactor, config_path, protocol, firehose, port, secret, collector):
+
+def run_agent(
+    reactor, config_path, protocol, firehose, port, secret, collector
+):
     identifiers = find_identifiers(FilePath(config_path))
     # Base64 encoded so it is valid json
     common = identifiers.set(u"secret", secret)
@@ -142,8 +150,11 @@ def run_agent(reactor, config_path, protocol, firehose, port, secret, collector)
     reporter = Reporter(location=location, common=common)
     # reporter = StdoutReporter(common=common)
 
-    loop = LoopingCall(lambda: collector.collect().addCallback(_maybe_report, reporter))
-    # TODO Capped exponential backoff on errors from the server
+    loop = LoopingCall(
+        lambda: collector.collect().addCallback(_maybe_report, reporter)
+    )
+    # If an iteration fails this Deferred fires with a failure and the process
+    # exits.  Docker will restart us.
     return loop.start(REPORT_INTERVAL.total_seconds(), now=True)
 
 
