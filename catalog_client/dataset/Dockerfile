@@ -1,2 +1,2 @@
 FROM clusterhq/catalog-agents-core
-CMD ["catalog-dataset-agent"]
+CMD ["catalog-flocker-agent"]
