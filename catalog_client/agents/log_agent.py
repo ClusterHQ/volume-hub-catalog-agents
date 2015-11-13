@@ -1,10 +1,10 @@
 # Report flocker-control, flocker-dataset-agent logs
 #
-# Support Ubuntu, CentOS, and CoreOS (https://clusterhq.com/2015/09/01/flocker-runs-on-coreos/)
+# Goals: support Ubuntu, CentOS, and CoreOS
+# (https://clusterhq.com/2015/09/01/flocker-runs-on-coreos/)
 #
-# Requires /var/run/docker.sock bind-mounted from the host so the Docker API
-# can be used to run more containers to collect the logs - which reside on the
-# host.
+# Requires / from the host bind-mounted at /host to dig around the various
+# places logs can be found on those platforms.
 
 from twisted.internet.defer import DeferredList
 
@@ -15,14 +15,17 @@ from ._dockerlogs import _DockerCollector
 from ._filelogs import _SyslogCollector
 from ._journallogs import _JournaldCollector
 
+
 def main():
     collector = _Collector()
     return agent_main(collector)
+
 
 class NoApplicableDetector(Exception):
     """
     No collector detected an execution environment to which it is suited.
     """
+
 
 class _Collector(object):
     name = b"log"
@@ -41,7 +44,8 @@ class _Collector(object):
 
     def _filter_detection(self, detection_results):
         applicable = []
-        for collector, (success, detection_result) in zip(self._COLLECTORS, detection_results):
+        combined = zip(self._COLLECTORS, detection_results)
+        for collector, (success, detection_result) in combined:
             if success:
                 if detection_result:
                     applicable.append(collector)
@@ -95,4 +99,3 @@ class _Collector(object):
             return d
 
         return self._collector.collect()
-

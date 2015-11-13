@@ -4,6 +4,7 @@ from twisted.internet.task import LoopingCall
 
 from eliot import write_failure
 
+
 class _MultiStreamCollector(object):
     def __init__(self, log_streams):
         self.log_streams = log_streams
@@ -21,6 +22,7 @@ class _MultiStreamCollector(object):
         d = log_stream.run()
         d.addErrback(write_failure)
         return d
+
 
 class _MultiStreamRecorder(object):
     def __init__(self):
