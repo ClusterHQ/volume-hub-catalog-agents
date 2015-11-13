@@ -1,5 +1,5 @@
 #!/bin/sh
-if [ "$TARGET" = "control-service" ]; then
+if [ "$RUN_FLOCKER_AGENT_HERE" = "1" ]; then
     sudo docker rm -f volume-hub-agent-dataset || false
     sudo docker pull clusterhq/catalog-agents-dataset
     sudo -E docker run -d --restart=always \
@@ -8,8 +8,9 @@ if [ "$TARGET" = "control-service" ]; then
         -v /:/host \
         --name volume-hub-agent-dataset \
         clusterhq/catalog-agents-dataset
+fi
 
-elif [ "$TARGET" = "agent-node" ]; then
+if [ "$TARGET" = "agent-node" ]; then
     sudo docker rm -f volume-hub-agent-docker || false
     sudo docker pull clusterhq/catalog-agents-docker
     sudo -E docker run -d --restart=always \
