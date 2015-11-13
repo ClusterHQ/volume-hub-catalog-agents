@@ -22,7 +22,7 @@ import yaml
 
 from pyrsistent import PClass, PMap, pmap, field, thaw
 
-DEFAULT_FIREHOSE_HOSTNAME = b"firehose.volumehub.io"
+DEFAULT_FIREHOSE_HOSTNAME = b"firehose-volumehub.clusterhq.com"
 DEFAULT_FIREHOSE_PORT = 443
 DEFAULT_FIREHOSE_PROTOCOL = "https"
 
