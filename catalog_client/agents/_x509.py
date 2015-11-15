@@ -1,5 +1,4 @@
 from OpenSSL.crypto import FILETYPE_PEM, load_certificate
-from sys import argv
 
 from pyasn1.type import univ, constraint, char, namedtype, tag
 

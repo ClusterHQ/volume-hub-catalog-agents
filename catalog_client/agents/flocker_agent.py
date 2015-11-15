@@ -34,6 +34,9 @@ def _collector_from_environment(environ):
         target_hostname = get_dns_subject_alt_name(
             config_path.child(b"control-service.crt").path
         )
+        raise Exception("Do not run flocker collector from control service "
+                        "node. It has no user key so it cannot authenticate to "
+                        "itself.")
 
     return _Collector(
         flocker_client=get_client(
