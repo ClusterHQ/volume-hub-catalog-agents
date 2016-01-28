@@ -4,6 +4,7 @@ if [ "$RUN_FLOCKER_AGENT_HERE" = "1" ]; then
     sudo docker pull clusterhq/catalog-agents-dataset
     sudo -E docker run -d --restart=always \
         -e CATALOG_FIREHOSE_SECRET="$TOKEN" \
+        -e CATALOG_FIREHOSE_HOSTNAME \
         -e FLOCKER_CONFIGURATION_PATH=/host/etc/flocker \
         -v /:/host \
         --name volume-hub-agent-dataset \
@@ -15,6 +16,7 @@ if [ "$TARGET" = "agent-node" ]; then
     sudo docker pull clusterhq/catalog-agents-docker
     sudo -E docker run -d --restart=always \
         -e CATALOG_FIREHOSE_SECRET="$TOKEN" \
+        -e CATALOG_FIREHOSE_HOSTNAME \
         -e FLOCKER_CONFIGURATION_PATH=/host/etc/flocker \
         -v /:/host \
         --name volume-hub-agent-docker \
@@ -26,6 +28,7 @@ sudo docker rm -f volume-hub-agent-log || false
 sudo docker pull clusterhq/catalog-agents-log
 sudo -E docker run -d --restart=always \
     -e CATALOG_FIREHOSE_SECRET="$TOKEN" \
+    -e CATALOG_FIREHOSE_HOSTNAME \
     -e FLOCKER_CONFIGURATION_PATH=/host/etc/flocker \
     -v /:/host \
     --name volume-hub-agent-log \
@@ -35,6 +38,7 @@ sudo docker rm -f volume-hub-agent-node || false
 sudo docker pull clusterhq/catalog-agents-node
 sudo -E docker run -d --restart=always \
     -e CATALOG_FIREHOSE_SECRET="$TOKEN" \
+    -e CATALOG_FIREHOSE_HOSTNAME \
     -e FLOCKER_CONFIGURATION_PATH=/host/etc/flocker \
     -v /:/host \
     --name volume-hub-agent-node \
