@@ -1,5 +1,7 @@
 # Collect Flocker version
 
+from __future__ import print_function
+
 from os import environ
 
 from twisted.internet.utils import getProcessOutput
@@ -20,4 +22,6 @@ class _Collector(object):
             env=environ,
         ).addCallback(
             lambda version: version.strip()
+        ).addErrback(
+            lambda _ : "Unknown Version"
         )
