@@ -116,7 +116,6 @@ class _DockerLogStream(object):
                 except:
                     write_traceback(
                         system="log-agent:docker-collector:open:failed",
-                        container=self.container_id,
                     )
                     return None
                 else:
